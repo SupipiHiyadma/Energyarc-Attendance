@@ -37,11 +37,11 @@
       border-radius: 4px;
       display: none;
     }
-    #status.success {
+    .success {
       background-color: #d4edda;
       color: #155724;
     }
-    #status.error {
+    .error {
       background-color: #f8d7da;
       color: #721c24;
     }
@@ -60,7 +60,7 @@
   <div id="status"></div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzKUrXTPdj63Dl6msSSUOmgIeN6IsClxuGusoEZtLm8kUNlfY1e_ClNFfas8zcomDs/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbywEtfWi-rf-w0ia4q1EsDV34wA7PbBifI9bpACvIVacJv6AEywwcZsWY8km0UUHH8i/exec";
 
     function updateStatus(message, isSuccess) {
       const status = document.getElementById('status');
@@ -83,17 +83,20 @@
         },
         body: JSON.stringify({ employeeId, action })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
       .then(data => {
         if (data.status === 'success') {
-          updateStatus(`Successfully recorded ${action} for Employee ID ${employeeId}.`, true);
+          updateStatus(`✔️ Recorded ${action} for Employee ID ${employeeId}`, true);
           document.getElementById('employeeId').value = '';
         } else {
-          updateStatus('Failed to record attendance: ' + (data.error || 'Unknown error'), false);
+          updateStatus('❌ Failed to record attendance: ' + (data.error || 'Unknown error'), false);
         }
       })
       .catch(error => {
-        updateStatus('Error sending data: ' + error.message, false);
+        updateStatus('❌ Error sending data: ' + error.message, false);
       });
     }
   </script>
