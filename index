@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Employee Attendance</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    input, button {
+      font-size: 1em;
+      margin: 10px 0;
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      background-color: #2a9df4;
+      color: white;
+      border-radius: 4px;
+    }
+    button.leave {
+      background-color: #f4a42a;
+    }
+    #status {
+      margin-top: 15px;
+      padding: 10px;
+      text-align: center;
+      border-radius: 4px;
+      display: none;
+    }
+    #status.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    #status.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Employee Attendance</h2>
+
+  <input type="text" id="employeeId" placeholder="Enter Employee ID" />
+
+  <button onclick="sendAttendance('Clock In')">Clock In</button>
+  <button onclick="sendAttendance('Clock Out')">Clock Out</button>
+  <button class="leave" onclick="sendAttendance('Leave')">Mark Leave</button>
+
+  <div id="status"></div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzKUrXTPdj63Dl6msSSUOmgIeN6IsClxuGusoEZtLm8kUNlfY1e_ClNFfas8zcomDs/exec
+";
+
+    function updateStatus(message, isSuccess) {
+      const status = document.getElementById('status');
+      status.style.display = 'block';
+      status.textContent = message;
+      status.className = isSuccess ? 'success' : 'error';
+    }
+
+    function sendAttendance(action) {
+      const employeeId = document.getElementById('employeeId').value.trim();
+      if (!employeeId) {
+        updateStatus('Please enter your Employee ID.', false);
+        return;
+      }
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ employeeId, action })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updateStatus(`Successfully recorded ${action} for Employee ID ${employeeId}.`, true);
+          document.getElementById('employeeId').value = '';
+        } else {
+          updateStatus('Failed to record attendance: ' + (data.error || 'Unknown error'), false);
+        }
+      })
+      .catch(error => {
+        updateStatus('Error sending data: ' + error.message, false);
+      });
+    }
+  </script>
+
+</body>
+</html>
